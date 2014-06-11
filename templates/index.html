@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Top</title>
+</head>
+<body>
+{% if session.is_login %}
+  <a href="{{ url_for('logout') }}">ログアウト</a>
+{% else %}
+  <a href="{{ url_for('login') }}">ログイン</a>
+{% endif %}
+</body>
+</html>
