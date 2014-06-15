@@ -6,7 +6,7 @@ from functools import wraps
 from flask import render_template, request, redirect, url_for
 from flask import session
 
-from lib import foursquare as fsq
+from lib.foursquare import Foursquare
 
 app = Flask(__name__)
 app.config.from_object("settings")
@@ -23,7 +23,7 @@ def index():
 @app.route("/login")
 def login():
     callback = url_for("authenticate", _external=True)
-    redirect_to = fsq.authenticate_url(CLIENT_ID, callback)
+    redirect_to = Foursquare.authenticate_url(CLIENT_ID, callback)
     return redirect(redirect_to)
 
 @app.route("/logout")
