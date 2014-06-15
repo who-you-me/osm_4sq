@@ -35,10 +35,36 @@ def logout():
 def authenticate():
     callback = url_for("authenticate", _external=True)
     code = request.args["code"]
-    access_token = fsq.get_access_token(CLIENT_ID, CLIENT_SECRET, callback, code)
-    session["is_login"] = True
+
+    access_token = Foursquare.get_access_token(
+        CLIENT_ID, CLIENT_SECRET,
+        callback, code
+    )
+
     session["access_token"] = access_token
+    session["user"] = get_user(access_token)
+    session["is_login"] = True
     return redirect(url_for("index"))
+
+def get_user(access_token):
+    fsq = Foursquare(access_token)
+    user = fsq.users()
+    print user
+
+    if user.get("lastName"):
+        name = user["lastName"] + " " + user["firstName"]
+    else:
+        name = user["firstName"]
+    photo = user["photo"]["prefix"] + "60x60" + user["photo"]["suffix"]
+
+    result = {
+        "name": name,
+        "photo": photo,
+        "bio": user["bio"],
+        "homeCity": user["homeCity"]
+    }
+
+    return result
 
 if __name__ == "__main__":
     app.run(debug=True)
