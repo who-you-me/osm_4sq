@@ -16,15 +16,6 @@ CLIENT_SECRET = app.config["CLIENT_SECRET"]
 
 app.secret_key = app.config["SECRET_KEY"]
 
-def login_required(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-#        if g.user is None:
-        if True:
-            return redirect(url_for("login", next=request.path))
-        return func(*args, **kwargs)
-    return decorated
-
 @app.route("/")
 def index():
     return render_template("index.html")
