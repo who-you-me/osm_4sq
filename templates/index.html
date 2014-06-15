@@ -1,14 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <title>Top</title>
+<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+<script>
+  function init() {
+    var map = new OpenLayers.Map("canvas");
+    var mapnik = new OpenLayers.Layer.OSM();
+    map.addLayer(mapnik);
+
+    var lonLat = new OpenLayers.LonLat(139.76, 35.68)
+      .transform(
+        new OpenLayers.Projection("EPSG:4326"),
+        new OpenLayers.Projection("EPSG:900913")
+      );
+    map.setCenter(lonLat, 15);
+    }
+</script>
 </head>
-<body>
-{% if session.is_login %}
-  <a href="{{ url_for('logout') }}">ログアウト</a>
-{% else %}
-  <a href="{{ url_for('login') }}">ログイン</a>
-{% endif %}
+<body onload="init()">
+<div class="header">
+  <h1>OSM4SQ</h1>
+  {% if session.is_login %}
+    <img src="{{ session.user.photo }}">
+    {{ session.user.name }} さん
+    <a href="{{ url_for('logout') }}">ログアウト</a>
+  {% else %}
+    <a href="{{ url_for('login') }}">ログイン</a>
+  {% endif %}
+</div>
+<div id="canvas" style="width:500px; height:400px"></div>
 </body>
 </html>
