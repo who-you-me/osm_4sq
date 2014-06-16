@@ -36,12 +36,10 @@ class Foursquare(object):
         self.oauth_token = oauth_token
         self.version = self.get_version()
 
-    def handle_request(self, path, method):
+    def handle_request(self, path, method, **params):
         url = self.BASEURL + path
-        params = {
-            "oauth_token": self.oauth_token,
-            "v": self.version
-        }
+        params["oauth_token"] = self.oauth_token,
+        params["v"] = self.version
         if method == "GET":
             resp = requests.get(url, params=params)
         elif method == "GET":
@@ -58,4 +56,10 @@ class Foursquare(object):
         path = "/users/%s" % user_id
         resp = self.handle_request(path, method)
         return resp["response"]["user"]
+
+    def checkins(self):
+        method = "GET"
+        path = "/users/self/checkins"
+        resp = self.handle_request(path, method, limit=250)
+        return resp["response"]["checkins"]
 
