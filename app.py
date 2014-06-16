@@ -4,7 +4,8 @@ from flask import Flask
 
 from functools import wraps
 from flask import render_template, request, redirect, url_for
-from flask import session
+from flask import jsonify, session
+from werkzeug.contrib.cache import SimpleCache
 
 from lib.foursquare import Foursquare
 
@@ -15,6 +16,11 @@ CLIENT_ID = app.config["CLIENT_ID"]
 CLIENT_SECRET = app.config["CLIENT_SECRET"]
 
 app.secret_key = app.config["SECRET_KEY"]
+
+cache = SimpleCache()
+
+def is_login():
+    return session.has_key("is_login")
 
 @app.route("/")
 def index():
@@ -42,14 +48,22 @@ def authenticate():
     )
 
     session["access_token"] = access_token
-    session["user"] = get_user(access_token)
+    session["user"] = get_user()
     session["is_login"] = True
+
     return redirect(url_for("index"))
 
-def get_user(access_token):
-    fsq = Foursquare(access_token)
+@app.route("/checkins")
+def checkins():
+    checkins = {}
+    if is_login():
+        checkins = get_checkins()
+        return jsonify(checkins)
+    return jsonify(checkins)
+
+def get_user():
+    fsq = Foursquare(session["access_token"])
     user = fsq.users()
-    print user
 
     if user.get("lastName"):
         name = user["lastName"] + " " + user["firstName"]
@@ -65,6 +79,15 @@ def get_user(access_token):
     }
 
     return result
+
+def get_checkins():
+    key = "checkins-%s" % session["user"]
+    checkins = cache.get(key)
+    if not checkins:
+        fsq = Foursquare(session["access_token"])
+        checkins = fsq.checkins()
+        cache.set(key, checkins, timeout=60*60)
+    return checkins
 
 if __name__ == "__main__":
     app.run(debug=True)
