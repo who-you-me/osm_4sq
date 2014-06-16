@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Top</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 <script>
   function init() {
-    var map = new OpenLayers.Map("canvas");
+    map = new OpenLayers.Map("canvas");
     var mapnik = new OpenLayers.Layer.OSM();
     map.addLayer(mapnik);
 
@@ -30,6 +31,26 @@
     <a href="{{ url_for('login') }}">ログイン</a>
   {% endif %}
 </div>
-<div id="canvas" style="width:500px; height:400px"></div>
+<div id="canvas" style="width:900px; height:600px"></div>
+<div id="checkins"></div>
+{% if session.is_login %}
+<script>
+$.get("checkins", function(data) {
+  for (var i = 0; i < data.items.length; i++) {
+    var item = data.items[i];
+    var lng = item.venue.location.lng;
+    var lat = item.venue.location.lat;
+    var lonLat = new OpenLayers.LonLat(lng, lat)
+      .transform(
+        new OpenLayers.Projection("EPSG:4326"),
+        new OpenLayers.Projection("EPSG:900913")
+      );
+    var markers = new OpenLayers.Layer.Markers("Markers");
+    map.addLayer(markers);
+    markers.addMarker(new OpenLayers.Marker(lonLat));
+  }
+});
+</script>
+{% endif %}
 </body>
 </html>
