@@ -36,6 +36,9 @@
 {% if session.is_login %}
 <script>
 $.get("checkins", function(data) {
+  var markers = new OpenLayers.Layer.Markers("Markers");
+  map.addLayer(markers);
+
   for (var i = 0; i < data.items.length; i++) {
     var item = data.items[i];
     var lng = item.venue.location.lng;
@@ -45,9 +48,26 @@ $.get("checkins", function(data) {
         new OpenLayers.Projection("EPSG:4326"),
         new OpenLayers.Projection("EPSG:900913")
       );
-    var markers = new OpenLayers.Layer.Markers("Markers");
-    map.addLayer(markers);
-    markers.addMarker(new OpenLayers.Marker(lonLat));
+
+
+    var feature = new OpenLayers.Feature(markers, lonLat);
+    var marker = new OpenLayers.Marker(lonLat);
+    marker.name = item.venue.name;
+
+    marker.events.register("mouseover", marker, function(evt) {
+      console.log(this);
+      popup = new OpenLayers.Popup.FramedCloud("Popup",
+        this.lonlat,
+        null,
+        this.name,
+        null,
+        false
+      );
+      map.addPopup(popup);
+    });
+    marker.events.register("mouseout", marker, function(evt) {popup.hide();});
+
+    markers.addMarker(marker);
   }
 });
 </script>
