@@ -36,13 +36,41 @@
 {% if session.is_login %}
 <script>
 $.get("checkins", function(data) {
+  var nItems = data.items.length;
+  var venues = [];
+  var lngLats = [0, 0];
+
+  for (var i = 0; i < nItems; i++) {
+    var venue = data.items[i].venue;
+    lngLats[0] += venue.location.lng;
+    lngLats[1] += venue.location.lat;
+
+    if (typeof venues[venue.id] === "undefined") {
+      venues[venue.id] = {"value": venue, "count": 1}
+    } else {
+      venues[venue.id]["count"] += 1;
+    }
+  }
+
+  lngLats[0] /= nItems;
+  lngLats[1] /= nItems;
+
+  var lngLat = new OpenLayers.LonLat(lngLats[0], lngLats[1])
+    .transform(
+      new OpenLayers.Projection("EPSG:4326"),
+      new OpenLayers.Projection("EPSG:900913")
+    );
+  map.setCenter(lngLat, 8);
+
   var markers = new OpenLayers.Layer.Markers("Markers");
   map.addLayer(markers);
 
-  for (var i = 0; i < data.items.length; i++) {
-    var item = data.items[i];
-    var lng = item.venue.location.lng;
-    var lat = item.venue.location.lat;
+
+  venueKeys = Object.keys(venues);
+  for (var i = 0; i < venueKeys.length; i++) {
+    var venue = venues[venueKeys[i]];
+    var lng = venue.value.location.lng;
+    var lat = venue.value.location.lat;
     var lonLat = new OpenLayers.LonLat(lng, lat)
       .transform(
         new OpenLayers.Projection("EPSG:4326"),
@@ -50,12 +78,10 @@ $.get("checkins", function(data) {
       );
 
 
-    var feature = new OpenLayers.Feature(markers, lonLat);
     var marker = new OpenLayers.Marker(lonLat);
-    marker.name = item.venue.name;
+    marker.name = venue.value.name;
 
     marker.events.register("mouseover", marker, function(evt) {
-      console.log(this);
       popup = new OpenLayers.Popup.FramedCloud("Popup",
         this.lonlat,
         null,
@@ -68,6 +94,9 @@ $.get("checkins", function(data) {
     marker.events.register("mouseout", marker, function(evt) {popup.hide();});
 
     markers.addMarker(marker);
+  }
+  for (var i = 0; i < data.items.length; i++) {
+    var item = data.items[i];
   }
 });
 </script>
