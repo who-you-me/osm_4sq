@@ -5,20 +5,7 @@
 <title>Top</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
-<script>
-  function init() {
-    map = new OpenLayers.Map("canvas");
-    var mapnik = new OpenLayers.Layer.OSM();
-    map.addLayer(mapnik);
-
-    var lonLat = new OpenLayers.LonLat(139.76, 35.68)
-      .transform(
-        new OpenLayers.Projection("EPSG:4326"),
-        new OpenLayers.Projection("EPSG:900913")
-      );
-    map.setCenter(lonLat, 15);
-    }
-</script>
+<script src="{{ url_for('static', filename='osm4sq.js') }}"></script>
 </head>
 <body onload="init()">
 <div class="header">
@@ -33,73 +20,5 @@
 </div>
 <div id="canvas" style="width:900px; height:600px"></div>
 <div id="checkins"></div>
-{% if session.is_login %}
-<script>
-$.get("checkins", function(data) {
-  var nItems = data.items.length;
-  var venues = [];
-  var lngLats = [0, 0];
-
-  for (var i = 0; i < nItems; i++) {
-    var venue = data.items[i].venue;
-    lngLats[0] += venue.location.lng;
-    lngLats[1] += venue.location.lat;
-
-    if (typeof venues[venue.id] === "undefined") {
-      venues[venue.id] = {"value": venue, "count": 1}
-    } else {
-      venues[venue.id]["count"] += 1;
-    }
-  }
-
-  lngLats[0] /= nItems;
-  lngLats[1] /= nItems;
-
-  var lngLat = new OpenLayers.LonLat(lngLats[0], lngLats[1])
-    .transform(
-      new OpenLayers.Projection("EPSG:4326"),
-      new OpenLayers.Projection("EPSG:900913")
-    );
-  map.setCenter(lngLat, 8);
-
-  var markers = new OpenLayers.Layer.Markers("Markers");
-  map.addLayer(markers);
-
-
-  venueKeys = Object.keys(venues);
-  for (var i = 0; i < venueKeys.length; i++) {
-    var venue = venues[venueKeys[i]];
-    var lng = venue.value.location.lng;
-    var lat = venue.value.location.lat;
-    var lonLat = new OpenLayers.LonLat(lng, lat)
-      .transform(
-        new OpenLayers.Projection("EPSG:4326"),
-        new OpenLayers.Projection("EPSG:900913")
-      );
-
-
-    var marker = new OpenLayers.Marker(lonLat);
-    marker.name = venue.value.name;
-
-    marker.events.register("mouseover", marker, function(evt) {
-      popup = new OpenLayers.Popup.FramedCloud("Popup",
-        this.lonlat,
-        null,
-        this.name,
-        null,
-        false
-      );
-      map.addPopup(popup);
-    });
-    marker.events.register("mouseout", marker, function(evt) {popup.hide();});
-
-    markers.addMarker(marker);
-  }
-  for (var i = 0; i < data.items.length; i++) {
-    var item = data.items[i];
-  }
-});
-</script>
-{% endif %}
 </body>
 </html>
