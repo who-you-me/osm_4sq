@@ -83,10 +83,36 @@ def get_user():
 def get_checkins():
     key = "checkins-%s" % session["user"]
     checkins = cache.get(key)
-    if not checkins:
-        fsq = Foursquare(session["access_token"])
-        checkins = fsq.checkins()
-        cache.set(key, checkins, timeout=60*60)
+    if checkins:
+        return checkins
+
+    fsq = Foursquare(session["access_token"])
+    raw_checkins = fsq.checkins()
+
+    items = raw_checkins["items"]
+    checkins = {"items": {}}
+    center = {"lon": 0, "lat": 0}
+    for item in items:
+        venue = item["venue"]
+        if not venue["id"] in checkins["items"]:
+            checkins["items"][venue["id"]] = {
+                "name": venue["name"],
+                "location": {
+                    "lon": venue["location"]["lng"],
+                    "lat": venue["location"]["lat"]
+                },
+                "count": 1
+            }
+        else:
+            checkins["items"][venue["id"]]["count"] += 1
+        center["lon"] += venue["location"]["lng"]
+        center["lat"] += venue["location"]["lat"]
+
+    center["lon"] /= len(items)
+    center["lat"] /= len(items)
+    checkins["center"] = center
+
+    cache.set(key, checkins, timeout=60*60)
     return checkins
 
 if __name__ == "__main__":
