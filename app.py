@@ -69,7 +69,7 @@ def get_user():
         name = user["lastName"] + " " + user["firstName"]
     else:
         name = user["firstName"]
-    photo = user["photo"]["prefix"] + "60x60" + user["photo"]["suffix"]
+    photo = user["photo"]["prefix"] + "20x20" + user["photo"]["suffix"]
 
     result = {
         "name": name,
