@@ -39,7 +39,7 @@ _setMarker = (map, data) ->
             setPopup(map, marker, venue)
             markers.addMarker(marker)
     else
-        lonLat = makeLonLat([139.76, 35.68])
+        lonLat = makeLonLat({lon: 139.76, lat: 35.68})
         map.setCenter(lonLat, 15);
 
 setMarker = (map) ->

@@ -35,7 +35,10 @@ _setMarker = function(map, data) {
     }
     return _results;
   } else {
-    lonLat = makeLonLat([139.76, 35.68]);
+    lonLat = makeLonLat({
+      lon: 139.76,
+      lat: 35.68
+    });
     return map.setCenter(lonLat, 15);
   }
 };
