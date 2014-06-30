@@ -1,0 +1,12 @@
+.navbar {
+  border-radius: 0px;
+}
+
+.navbar-inverse .navbar-brand {
+  color: white;
+}
+
+#canvas .olControlAttribution {
+  right: 5px;
+  bottom: 5px;
+}
